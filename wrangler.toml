@@ -8,8 +8,18 @@ workers_dev = true
 [triggers]
 crons = ["30 0 * * *"]
 
-[observability]
+# Workers Logs: keep every invocation (sampling 1 = 100%), including each cron
+# result line. Traces stay off; the run is a handful of fetches.
+[observability.logs]
 enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+persist = true
+
+[observability.traces]
+enabled = false
+head_sampling_rate = 1
+persist = true
 
 [vars]
 GH_OWNER = "shreesharma07"
