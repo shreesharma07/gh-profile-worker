@@ -1,5 +1,0 @@
-# Copy to .dev.vars for `pnpm dev`. .dev.vars is git-ignored.
-GH_TOKEN=github_pat_xxxxxxxxxxxxxxxxxxxxxxxx
-RUN_KEY=replace-with-output-of-openssl-rand-hex-24
-# Keep local runs from committing to the real repo
-DRY_RUN=true
