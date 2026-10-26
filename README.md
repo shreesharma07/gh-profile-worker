@@ -51,8 +51,10 @@ It takes over the job of `tools/build-profile.mjs --stats-only` and the `profile
 
 ```mermaid
 flowchart TD
-    cron(["Cron trigger<br>30 0 * * * UTC = 06:00 IST"]) --> runner
-    manual(["POST /run<br>Bearer RUN_KEY"]) --> runner
+    cron(["Cloudflare cron<br>30 0 * * * UTC = 06:00 IST"]) --> runner
+    trigger(["pnpm trigger<br>POST /run on the deployed Worker"]) --> runner
+    dev(["pnpm dev<br>POST /run or cron URL on localhost"]) --> runner
+    local(["pnpm refresh<br>same code in Node, no Wrangler"]) --> runner
     runner["runJobs()<br>every job in src/jobs/registry.ts"] --> read
 
     subgraph job["stats job: plan()"]
@@ -207,21 +209,35 @@ You need Node.js 22.18 or newer (for native TypeScript), pnpm, and a free Cloudf
 git clone https://github.com/shreesharma07/gh-profile-worker.git
 cd gh-profile-worker
 pnpm install
-cp .dev.vars.example .dev.vars        # fill in GH_TOKEN and RUN_KEY, keep DRY_RUN=true
+cp .env.example .env                  # fill in GH_TOKEN, RUN_KEY and WORKER_URL
 pnpm check                            # typecheck + tests + bundle dry run
-pnpm dev                              # local Worker on http://localhost:8787
+pnpm refresh:dry                      # fetch and render with live data, no commit
 ```
 
-In a second terminal:
+### Updating the profile
+
+Every entry point runs the same `runJobs()` and commits straight to `shreesharma07/main` through the GitHub API. Wherever you run it from, the result is a `chore: refresh profile stats` commit on the real repo; there is nothing to push afterwards.
+
+| From | Command | Needs |
+| --- | --- | --- |
+| Cloudflare, on schedule | nothing, daily at 00:30 UTC | the deployed Worker |
+| Cloudflare, now | `pnpm trigger` | `WORKER_URL` and `RUN_KEY` in `.env` |
+| This machine, no Wrangler | `pnpm refresh` | `GH_TOKEN` in `.env` |
+| This machine, as a Worker | `pnpm dev`, then the requests below | `GH_TOKEN` and `RUN_KEY` in `.env` |
+
+Add `:dry` (`pnpm refresh:dry`, `pnpm trigger:dry`) to compute and print without committing, or `--job=stats` to run one job. `DRY_RUN=true` in `.env` turns every local path into a dry run.
+
+With `pnpm dev` running (it loads `.env` through `--env-file`), in a second terminal:
 
 ```bash
 curl http://localhost:8787/health
-curl "http://localhost:8787/cdn-cgi/handler/scheduled?cron=30+0+*+*+*"   # fire the cron handler
-curl -H "Authorization: Bearer $RUN_KEY" http://localhost:8787/run       # JSON, always a dry run
+curl "http://localhost:8787/cdn-cgi/handler/scheduled?cron=30+0+*+*+*"            # the cron handler; commits
+curl -X POST -H "Authorization: Bearer $RUN_KEY" http://localhost:8787/run        # commits what changed
+curl -X POST -H "Authorization: Bearer $RUN_KEY" "http://localhost:8787/run?dry=1" # never commits
 curl -H "Authorization: Bearer $RUN_KEY" -o preview.svg http://localhost:8787/preview
 ```
 
-With `DRY_RUN=true` in `.dev.vars`, nothing is ever written to GitHub.
+After a refresh, run `git pull` in your local clone of the profile repo to pick up the commit.
 
 ## Secrets
 
@@ -326,7 +342,9 @@ If a new SVG draws new text, add the strings to `src/render/labels.ts` and run `
 
 | Command | What it does |
 | --- | --- |
-| `pnpm dev` | Local Worker with the cron test route |
+| `pnpm dev` | Local Worker with the cron test route, secrets from `.env`; commits unless `DRY_RUN=true` |
+| `pnpm refresh` / `refresh:dry` | Runs every job in Node and commits to the profile repo / only prints |
+| `pnpm trigger` / `trigger:dry` | `POST /run` on the deployed Worker / with `?dry=1` |
 | `pnpm typecheck` | `tsc` over the Worker and the Node configs |
 | `pnpm test` | All `test/**/*.test.ts` with `node --test` |
 | `pnpm check` | Typecheck, tests and a bundle dry run; run before every push |
@@ -382,7 +400,7 @@ A submodule starts on a detached HEAD, so run `git switch main` before you edit.
 
 | Symptom | Fix |
 | --- | --- |
-| `GH_TOKEN secret is not set` | Fill `.dev.vars` locally, or `pnpm wrangler secret put GH_TOKEN` |
+| `GH_TOKEN secret is not set` | Fill `.env` locally, or `pnpm wrangler secret put GH_TOKEN` |
 | `HTTP 401` from GitHub | The token expired or was mistyped; create a new one and set it again |
 | `HTTP 403` / `404` on `/git/…` | The token lacks Contents write access or does not include the profile repo |
 | `HTTP 422` after retries | `main` is protected and requires pull requests; allow this token or relax the rule |

@@ -48,7 +48,7 @@ If you research in good faith, avoid privacy violations and data destruction, an
 
 **Secrets**
 
-- `GH_TOKEN` and `RUN_KEY` exist only as encrypted Worker secrets (`wrangler secret put`) and in a git-ignored `.dev.vars` for local runs. They are never written to `wrangler.toml`, to logs, or to any response.
+- `GH_TOKEN` and `RUN_KEY` exist only as encrypted Worker secrets (`wrangler secret put`) and in a git-ignored `.env` for local runs (`pnpm dev`, `pnpm refresh`, `pnpm trigger`). They are never written to `wrangler.toml`, to logs, or to any response.
 - `GH_TOKEN` is a fine-grained token limited to the profile repo, with **Contents: read and write** and nothing else. It has an expiry and is rotated before it lapses. A leaked token can rewrite that one repo's files, and nothing beyond it.
 
 **Token confinement**
