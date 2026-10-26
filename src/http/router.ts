@@ -1,11 +1,12 @@
 /**
- * HTTP routes. Anything other than /health needs RUN_KEY; a wrong key, a
- * missing key and an unknown path all get the same 404, so the Worker reveals
- * nothing about itself to scanners.
+ * HTTP routes. Anything other than /health needs `Authorization: Bearer
+ * <RUN_KEY>`; a wrong key, a missing key and an unknown path all get the same
+ * 404, so the Worker reveals nothing about itself to scanners.
  *
- *   GET  /health                  liveness, no auth
- *   GET|POST /run[?dry=1][&job=]  run every job (or one) like the cron does
- *   GET  /preview                 freshly rendered stats SVG, never commits
+ *   GET  /health               liveness, no auth
+ *   POST /run[?dry=1][&job=]   run every job (or one) like the cron does
+ *   GET  /run[?job=]           always a dry run: GET never writes
+ *   GET  /preview              freshly rendered stats SVG, never commits
  */
 import { readConfig, type Env } from '../config.ts';
 import { createJobContext } from '../context.ts';
@@ -29,7 +30,7 @@ export async function handleRequest(req: Request, env: Env): Promise<Response> {
     const job = name ? findJob(name) : undefined;
     if (name && !job) return Response.json({ error: `unknown job "${name}"`, jobs: JOBS.map((j) => j.name) }, { status: 400 });
     const jobs: readonly Job[] = job ? [job] : JOBS;
-    const dryRun = searchParams.get('dry') === '1' || readConfig(env).dryRun;
+    const dryRun = req.method === 'GET' || searchParams.get('dry') === '1' || readConfig(env).dryRun;
     const { results } = await runJobs(jobs, createJobContext(env), { dryRun });
     const failed = results.some((r) => r.reason === 'failed');
     return Response.json({ dryRun, results }, { status: failed ? 502 : 200, headers: noStore });

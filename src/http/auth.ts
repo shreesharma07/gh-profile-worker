@@ -1,13 +1,13 @@
 /**
- * RUN_KEY check for the manual routes. The key may arrive as
- * `Authorization: Bearer <key>` (preferred: it stays out of access logs) or as
- * `?key=<key>` for quick browser use. Comparison is constant time.
+ * RUN_KEY check for the manual routes. The key is accepted only as
+ * `Authorization: Bearer <key>`: a query string would leave the long-lived
+ * secret in access logs, proxies and shell history. Comparison is constant time.
  */
 
 export function presentedKey(req: Request): string | null {
   const auth = req.headers.get('Authorization');
-  if (auth?.startsWith('Bearer ')) return auth.slice('Bearer '.length).trim() || null;
-  return new URL(req.url).searchParams.get('key');
+  if (!auth?.startsWith('Bearer ')) return null;
+  return auth.slice('Bearer '.length).trim() || null;
 }
 
 async function sha256(s: string): Promise<Uint8Array> {
