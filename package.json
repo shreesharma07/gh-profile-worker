@@ -1,0 +1,33 @@
+{
+  "name": "gh-profile-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker that refreshes the shreesharma07 GitHub profile stats strip and commits it through the GitHub API",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@12.15.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "deploy:dry": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "check": "pnpm typecheck && pnpm test && pnpm deploy:dry",
+    "build:font-data": "node scripts/build-font-data.ts",
+    "cf-typegen": "wrangler types --include-runtime false",
+    "tail": "wrangler tail --format pretty",
+    "secrets": "wrangler secret list",
+    "whoami": "wrangler whoami"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261026.1",
+    "@types/node": "^26.6.5",
+    "harfbuzzjs": "^1.6.4",
+    "subset-font": "^2.9.0",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.152.0"
+  }
+}

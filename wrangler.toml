@@ -1,0 +1,27 @@
+name = "gh-profile-worker"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# Cron is always UTC. 00:30 UTC = 06:00 IST, the same slot the old
+# profile-stats.yml workflow used. The free plan allows 5 cron triggers per account.
+[triggers]
+crons = ["30 0 * * *"]
+
+[observability]
+enabled = true
+
+[vars]
+GH_OWNER = "shreesharma07"
+GH_REPO = "shreesharma07"          # profile README repo the Worker commits into
+GH_BRANCH = "main"
+STATS_JSON_PATH = "assets/stats.json"
+STATS_SVG_PATH = "assets/stats.svg"
+WAKATIME_USER_ID = "d4ee9b09-006e-483f-b384-7fdc23c8b1ad"
+COMMIT_AUTHOR_NAME = "gh-profile-worker"
+COMMIT_AUTHOR_EMAIL = "gh-profile-worker@users.noreply.github.com"
+DRY_RUN = "false"
+
+# Secrets (never put them here):
+#   pnpm wrangler secret put GH_TOKEN   fine-grained PAT, only the profile repo, Contents: read and write
+#   pnpm wrangler secret put RUN_KEY    random string guarding /run and /preview
