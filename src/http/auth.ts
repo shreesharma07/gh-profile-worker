@@ -17,7 +17,9 @@ async function sha256(s: string): Promise<Uint8Array> {
 /** Hashing first gives both sides the same length, so neither length nor content leaks through timing. */
 export async function keysMatch(presented: string, expected: string): Promise<boolean> {
   const [a, b] = await Promise.all([sha256(presented), sha256(expected)]);
-  const subtle = crypto.subtle as SubtleCrypto & { timingSafeEqual?: (x: ArrayBufferView, y: ArrayBufferView) => boolean };
+  const subtle = crypto.subtle as SubtleCrypto & {
+    timingSafeEqual?: (x: ArrayBufferView, y: ArrayBufferView) => boolean;
+  };
   if (typeof subtle.timingSafeEqual === 'function') return subtle.timingSafeEqual(a, b);
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);

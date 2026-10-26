@@ -30,7 +30,7 @@ export class ConfigError extends Error {
   override name = 'ConfigError';
 }
 
-const nonEmpty = (v: string | undefined): string | null => (v && v.trim() ? v.trim() : null);
+const nonEmpty = (v: string | undefined): string | null => (v?.trim() ? v.trim() : null);
 
 export function readConfig(env: Env): Config {
   const owner = nonEmpty(env.GH_OWNER);
@@ -56,6 +56,7 @@ export function readConfig(env: Env): Config {
 /** The GitHub token is read separately so it never travels inside `Config`. */
 export function requireToken(env: Env): string {
   const token = nonEmpty(env.GH_TOKEN);
-  if (!token) throw new ConfigError('GH_TOKEN secret is not set (.dev.vars locally, `wrangler secret put GH_TOKEN` in production)');
+  if (!token)
+    throw new ConfigError('GH_TOKEN secret is not set (.env locally, `wrangler secret put GH_TOKEN` in production)');
   return token;
 }

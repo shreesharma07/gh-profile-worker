@@ -3,7 +3,7 @@
  * Writes are a single atomic commit: inline blobs in a tree, a commit on top of
  * the branch head, then a fast-forward of the ref.
  */
-import { GitHubError, type GitHubApi } from './api.ts';
+import { type GitHubApi, GitHubError } from './api.ts';
 
 export interface RepoTarget {
   owner: string;
@@ -19,10 +19,19 @@ export interface RepoStore {
   commitFiles(files: Record<string, string>, message: string): Promise<string>;
 }
 
-interface ContentsResponse { content: string }
-interface RefResponse { object: { sha: string } }
-interface CommitResponse { sha: string; tree: { sha: string } }
-interface TreeResponse { sha: string }
+interface ContentsResponse {
+  content: string;
+}
+interface RefResponse {
+  object: { sha: string };
+}
+interface CommitResponse {
+  sha: string;
+  tree: { sha: string };
+}
+interface TreeResponse {
+  sha: string;
+}
 
 /** How many times a commit is rebuilt when the branch moved underneath it. */
 const MAX_RETRIES = 2;

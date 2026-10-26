@@ -38,11 +38,15 @@ describe('loadLocalEnv', () => {
     assert.equal(env.GH_OWNER, 'me');
     assert.equal(env.GH_TOKEN, 't');
     assert.equal(env.DRY_RUN, 'false');
-    assert.equal(env['UNRELATED'], undefined);
+    assert.equal(env.UNRELATED, undefined);
   });
 
   it('prefers .env (what `pnpm dev --env-file .env` loads) over a leftover .dev.vars', () => {
-    const root = project({ 'wrangler.toml': TOML, '.env': 'GH_TOKEN=from-env\n', '.dev.vars': 'GH_TOKEN=from-dev-vars\n' });
+    const root = project({
+      'wrangler.toml': TOML,
+      '.env': 'GH_TOKEN=from-env\n',
+      '.dev.vars': 'GH_TOKEN=from-dev-vars\n',
+    });
     assert.equal(loadLocalEnv(root, {}).env.GH_TOKEN, 'from-env');
   });
 

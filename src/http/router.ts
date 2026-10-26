@@ -8,7 +8,7 @@
  *   GET  /run[?job=]           always a dry run: GET never writes
  *   GET  /preview              freshly rendered stats SVG, never commits
  */
-import { readConfig, type Env } from '../config.ts';
+import { type Env, readConfig } from '../config.ts';
 import { createJobContext } from '../context.ts';
 import { findJob, JOBS } from '../jobs/registry.ts';
 import { runJobs } from '../jobs/runner.ts';
@@ -28,7 +28,8 @@ export async function handleRequest(req: Request, env: Env): Promise<Response> {
   if (pathname === '/run' && (req.method === 'GET' || req.method === 'POST')) {
     const name = searchParams.get('job');
     const job = name ? findJob(name) : undefined;
-    if (name && !job) return Response.json({ error: `unknown job "${name}"`, jobs: JOBS.map((j) => j.name) }, { status: 400 });
+    if (name && !job)
+      return Response.json({ error: `unknown job "${name}"`, jobs: JOBS.map((j) => j.name) }, { status: 400 });
     const jobs: readonly Job[] = job ? [job] : JOBS;
     const dryRun = req.method === 'GET' || searchParams.get('dry') === '1' || readConfig(env).dryRun;
     const { results } = await runJobs(jobs, createJobContext(env), { dryRun });

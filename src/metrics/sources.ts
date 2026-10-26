@@ -49,6 +49,9 @@ export async function fetchCodingTime(fetcher: Fetcher, wakatimeUserId: string |
  * komarev counts every request as a view, so each refresh adds one.
  */
 export async function fetchProfileViews(fetcher: Fetcher, owner: string): Promise<Metrics['views']> {
-  const svg = await getText(fetcher, `https://komarev.com/ghpvc/?username=${encodeURIComponent(owner)}&abbreviated=true`);
+  const svg = await getText(
+    fetcher,
+    `https://komarev.com/ghpvc/?username=${encodeURIComponent(owner)}&abbreviated=true`,
+  );
   return svgTexts(svg).find((t) => /^[\d.,]+[KMB]?$/.test(t)) ?? null;
 }

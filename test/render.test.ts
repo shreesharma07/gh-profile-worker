@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { fit, measure } from '../src/render/fonts.ts';
+import { FONT_FACES } from '../src/render/generated/font-data.ts';
 import { LABELS, MISSING_VALUE, VALUE_CHARSET } from '../src/render/labels.ts';
 import { renderStatsStrip } from '../src/render/stats-strip.ts';
-import { FONT_FACES } from '../src/render/generated/font-data.ts';
 import type { StoredStats } from '../src/types.ts';
 
 const stats: StoredStats = { followers: 33, stars: 15, coding: '3,012 hrs', views: '27.6K', updated: '2026-10-22' };
@@ -41,7 +41,8 @@ describe('renderStatsStrip', () => {
 
 describe('font metrics', () => {
   it('has an advance for every character the values may contain', () => {
-    for (const ch of VALUE_CHARSET) assert.ok(FONT_FACES.d7.advances[ch as keyof typeof FONT_FACES.d7.advances] > 0, ch);
+    for (const ch of VALUE_CHARSET)
+      assert.ok(FONT_FACES.d7.advances[ch as keyof typeof FONT_FACES.d7.advances] > 0, ch);
   });
 
   it('keeps the size when the text fits and shrinks it in half steps when it does not', () => {

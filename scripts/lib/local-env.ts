@@ -45,7 +45,9 @@ export function loadLocalEnv(root: string, processEnv: NodeJS.ProcessEnv = proce
   const source = secretsFile(root);
   const fromFile = source ? parseEnv(readFileSync(source, 'utf8')) : {};
   const overrides = Object.fromEntries(
-    Object.entries(processEnv).filter(([k, v]) => v !== undefined && (k in vars || k in fromFile || k === 'WORKER_URL')),
+    Object.entries(processEnv).filter(
+      ([k, v]) => v !== undefined && (k in vars || k in fromFile || k === 'WORKER_URL'),
+    ),
   );
   return { env: { ...vars, ...fromFile, ...overrides } as LocalEnv['env'], source };
 }

@@ -4,7 +4,7 @@ import { createJobContext } from '../src/context.ts';
 import { runJobs } from '../src/jobs/runner.ts';
 import { statsJob } from '../src/jobs/stats.ts';
 import type { StoredStats } from '../src/types.ts';
-import { contents, fakeFetch, json, komarevBadge, text, wakatimeBadge, type Route } from './helpers/fake-fetch.ts';
+import { contents, fakeFetch, json, komarevBadge, type Route, text, wakatimeBadge } from './helpers/fake-fetch.ts';
 
 const env = { GH_OWNER: 'me', GH_REPO: 'me', GH_TOKEN: 't', WAKATIME_USER_ID: 'abc' };
 const stored: StoredStats = { followers: 33, stars: 15, coding: '3,012 hrs', views: '27.6K', updated: '2026-10-22' };
@@ -30,13 +30,23 @@ describe('stats job', () => {
   it('moves `updated` to today when a number changes', async () => {
     const plan = await statsJob.plan(createJobContext(env, fakeFetch(sources(34)), now));
     assert.equal(plan.changed, true);
-    assert.deepEqual(JSON.parse(plan.files['assets/stats.json'] ?? ''), { ...stored, followers: 34, updated: '2026-10-26' });
+    assert.deepEqual(JSON.parse(plan.files['assets/stats.json'] ?? ''), {
+      ...stored,
+      followers: 34,
+      updated: '2026-10-26',
+    });
     assert.match(plan.files['assets/stats.svg'] ?? '', />34<\/text>/);
   });
 
   it('writes stats.json keys in the existing order', async () => {
     const plan = await statsJob.plan(createJobContext(env, fakeFetch(sources(34)), now));
-    assert.deepEqual(Object.keys(JSON.parse(plan.files['assets/stats.json'] ?? '')), ['followers', 'stars', 'coding', 'views', 'updated']);
+    assert.deepEqual(Object.keys(JSON.parse(plan.files['assets/stats.json'] ?? '')), [
+      'followers',
+      'stars',
+      'coding',
+      'views',
+      'updated',
+    ]);
   });
 
   it('never commits on a dry run', async () => {

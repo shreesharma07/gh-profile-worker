@@ -1,5 +1,5 @@
 /** Builds the per-run `JobContext` from the Worker bindings. */
-import { readConfig, requireToken, type Env } from './config.ts';
+import { type Env, readConfig, requireToken } from './config.ts';
 import { createGitHubApi } from './github/api.ts';
 import { createRepoStore } from './github/repo.ts';
 import type { JobContext } from './jobs/types.ts';

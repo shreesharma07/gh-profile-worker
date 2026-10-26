@@ -45,7 +45,9 @@ describe('collectMetrics', () => {
     const { metrics, failures } = await collectMetrics(
       {
         followers: async () => 40,
-        stars: async () => { throw new Error('HTTP 503'); },
+        stars: async () => {
+          throw new Error('HTTP 503');
+        },
         coding: async () => null,
         views: async () => '28K',
       },

@@ -12,7 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Blob, Buffer as HbBuffer, Face, Font, Variation, shape } from 'harfbuzzjs';
+import { Blob, Face, Font, Buffer as HbBuffer, shape, Variation } from 'harfbuzzjs';
 import subsetFont from 'subset-font';
 import { LABEL_CHARSET, VALUE_CHARSET } from '../src/render/labels.ts';
 
@@ -37,8 +37,22 @@ interface FaceSpec {
 }
 
 const FACES: FaceSpec[] = [
-  { key: 'd7', file: 'SpaceGrotesk', wght: 700, family: 'Space Grotesk', fallback: 'system-ui,sans-serif', charset: VALUE_CHARSET },
-  { key: 'm4', file: 'JetBrainsMono', wght: 400, family: 'JetBrains Mono', fallback: 'ui-monospace,monospace', charset: LABEL_CHARSET },
+  {
+    key: 'd7',
+    file: 'SpaceGrotesk',
+    wght: 700,
+    family: 'Space Grotesk',
+    fallback: 'system-ui,sans-serif',
+    charset: VALUE_CHARSET,
+  },
+  {
+    key: 'm4',
+    file: 'JetBrainsMono',
+    wght: 400,
+    family: 'JetBrains Mono',
+    fallback: 'ui-monospace,monospace',
+    charset: LABEL_CHARSET,
+  },
 ];
 
 async function cached(name: string, url: string): Promise<Buffer> {
@@ -84,7 +98,9 @@ for (const spec of FACES) {
     advances: advances(ttf, spec.wght, spec.charset),
   };
   faces.push(`  ${spec.key}: ${JSON.stringify(entry, null, 2).replace(/\n/g, '\n  ')},`);
-  console.log(`${spec.key}: ${spec.family} ${spec.wght}, ${[...new Set(spec.charset)].length} chars, ${woff2.length} bytes woff2`);
+  console.log(
+    `${spec.key}: ${spec.family} ${spec.wght}, ${[...new Set(spec.charset)].length} chars, ${woff2.length} bytes woff2`,
+  );
 }
 
 const iconSvg = (await cached('wakatime.svg', WAKATIME_ICON_URL)).toString('utf8');

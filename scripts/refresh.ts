@@ -29,13 +29,16 @@ if (args.job && !job) {
 
 const config = readConfig(env);
 const dryRun = args.dry || config.dryRun;
-console.log(`secrets from ${source ?? 'process environment'} · target ${config.owner}/${config.repo}@${config.branch} · ${dryRun ? 'DRY RUN' : 'will commit'}`);
+console.log(
+  `secrets from ${source ?? 'process environment'} · target ${config.owner}/${config.repo}@${config.branch} · ${dryRun ? 'DRY RUN' : 'will commit'}`,
+);
 
 const { results } = await runJobs(job ? [job] : JOBS, createJobContext(env), { dryRun });
 console.log(JSON.stringify(results, null, 2));
 
 for (const r of results) {
-  if (r.committed) console.log(`✔ ${r.job}: committed https://github.com/${config.owner}/${config.repo}/commit/${r.sha}`);
+  if (r.committed)
+    console.log(`✔ ${r.job}: committed https://github.com/${config.owner}/${config.repo}/commit/${r.sha}`);
   else console.log(`${r.reason === 'failed' ? '✖' : '•'} ${r.job}: ${r.reason}${r.error ? ` (${r.error})` : ''}`);
 }
 if (results.some((r) => r.reason === 'failed')) process.exit(1);

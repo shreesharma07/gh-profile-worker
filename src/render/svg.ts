@@ -1,6 +1,7 @@
 /** A tiny SVG document builder: the parts of the builder's `Svg` class the strip needs. */
+
+import { type FaceKey, fontFaceCss } from './fonts.ts';
 import { C } from './theme.ts';
-import { fontFaceCss, type FaceKey } from './fonts.ts';
 
 export const xml = (s: unknown): string =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -39,7 +40,9 @@ export class SvgDoc {
 
   text(key: FaceKey, str: string, { x, y, size, fill = C.text, anchor = 'start' }: TextOptions): void {
     this.#faces.add(key);
-    this.#body.push(`<text x="${x}" y="${y}" class="${key}" font-size="${size}" fill="${fill}" text-anchor="${anchor}">${xml(str)}</text>`);
+    this.#body.push(
+      `<text x="${x}" y="${y}" class="${key}" font-size="${size}" fill="${fill}" text-anchor="${anchor}">${xml(str)}</text>`,
+    );
   }
 
   raw(markup: string): void {
